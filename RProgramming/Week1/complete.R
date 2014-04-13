@@ -19,20 +19,18 @@ complete <- function(directory, id = 1:332) {
   datafiles <- paste0(paste(directory, sprintf("%03d", id), sep = "/"), ".csv")
 
   # load all the files, rbind'ing as we go and assigne to poldata
-  poldata <- do.call("rbind", lapply(datafiles, function(fn) data.frame(Filename=fn, read.csv(fn))))
+  poldata <- do.call("rbind", lapply(datafiles,
+                                      function(fn) data.frame(Filename=fn, read.csv(fn)))
+  )
 
-  # get the complete cases
+  # get only the complete cases
   cc <- poldata[complete.cases(poldata), ]
 
-  # generate a frequency table on ID
-  tab <- table(cc$ID)
+  # aggregate on ID
+  agg <- aggregate(ID ~ factor(cc$ID, levels = id), data=cc, FUN = length)
+  colnames(agg) <- c("id", "nobs")
 
-  # pivot and name
-  comp_freq <- cbind(as.integer(names(tab)), tab)
-  colnames(comp_freq) <- c("id", "nobs")
-  rownames(comp_freq) <- 1:length(id)
-
-  return(comp_freq)
+  return(agg)
 
 }
 
