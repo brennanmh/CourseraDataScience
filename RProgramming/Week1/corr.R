@@ -31,15 +31,23 @@ corr <- function(directory, threshold = 0) {
   colnames(agg) <- c("id", "nobs")
 
   # pull those with monitors with more than threshold comlete cases
-  comp <<- agg[agg$nobs>threshold,]
+  comp <<- agg[agg$nobs > threshold,]
 
-  monitors <- comp$id
-
-  sulfite <- cc$sulfite[monitors]
-  nitrate <- cc$nitrate[monitors]
+  # get the vector of monitors that pass the threshold
+  monitors <<- as.numeric(comp$id)
 
   ## Return a numeric vector of correlations
+  out <- numeric(0)
+  for (i in monitors) {
+    out <- c(out, my_cor(cc[cc$ID==i,]))
+  }
 
+  return(out)
+
+}
+
+my_cor <- function(x) {
+  return(cor(x$sulfate, x$nitrate))
 }
 
 
