@@ -26,7 +26,20 @@ corr <- function(directory, threshold = 0) {
   # get only the complete cases
   cc <<- poldata[complete.cases(poldata), ]
 
+  # aggregate on ID NOTE: this is a copy of the complete function
+  agg <<- aggregate(ID ~ factor(cc$ID, levels = id), data=cc, FUN = length)
+  colnames(agg) <- c("id", "nobs")
+
+  # pull those with monitors with more than threshold comlete cases
+  comp <<- agg[agg$nobs>threshold,]
+
+  monitors <- comp$id
+
+  sulfite <- cc$sulfite[monitors]
+  nitrate <- cc$nitrate[monitors]
+
   ## Return a numeric vector of correlations
 
 }
+
 
