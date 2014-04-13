@@ -16,21 +16,26 @@ complete <- function(directory, id = 1:332) {
 
   # create a vector of the filenames for the monitors based on directory
   # and the ID vector
-  datafiles <- paste0(paste(directory, sprintf("%03d", id), sep = "/"), ".csv")
+  datafiles <<- paste0(paste(directory, sprintf("%03d", id), sep = "/"), ".csv")
 
   # load all the files, rbind'ing as we go and assigne to poldata
-  poldata <- do.call("rbind", lapply(datafiles,
-                                      function(fn) data.frame(Filename=fn, read.csv(fn)))
+  poldata <<- do.call("rbind",
+                     lapply(datafiles,
+                            function(fn) data.frame(Filename=fn, read.csv(fn)))
   )
 
-  # get only the complete cases
-  cc <- poldata[complete.cases(poldata), ]
+  # init out results vector to length of id with 0's
+  out <- rep(1:length(id), 0)
+  # for each id, calculate the number of complete cases
+  for (i in id) {
+    out <- c(out, sum(complete.cases(poldata[poldata$ID == i, ])))
+  }
+  # bind the ids in
+  final <- cbind(id, out)
+  # set the desired column names
+  colnames(final) <- c("id", "nobs")
 
-  # aggregate on ID
-  agg <- aggregate(ID ~ factor(cc$ID, levels = id), data=cc, FUN = length)
-  colnames(agg) <- c("id", "nobs")
-
-  return(agg)
+  return(final)
 
 }
 
